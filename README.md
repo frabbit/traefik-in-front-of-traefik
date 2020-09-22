@@ -29,3 +29,14 @@ ENV=production APP_DOMAIN=app1.localhost STACK_NAME=app1 docker stack deploy -c 
 ENV=staging APP_DOMAIN=app1-staging.localhost STACK_NAME=app1-staging docker stack deploy -c docker-compose.app1.yaml app1-staging
 ```
 
+# Use Lets Encrypt certificate resolver behind global traefik instance
+
+Multiple Environments can live side by side as long as the configuration uses the STACK_NAME for unique router and service names.
+
+```
+docker network create global-traefik-net --driver=overlay
+docker stack deploy -c docker-compose.global.yaml global
+ENV=production APP_DOMAIN=mydomain STACK_NAME=app docker stack deploy -c docker-compose.app3-letsencrypt.yaml app
+ENV=staging APP_DOMAIN=mydomain-staging STACK_NAME=app-staging docker stack deploy -c docker-compose.app3-letsencrypt.yaml app-staging
+```
+
