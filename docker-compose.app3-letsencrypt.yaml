@@ -31,6 +31,7 @@ services:
       # used for development
       - --certificatesresolvers.${STACK_NAME?required}-lets-encrypt-resolver-staging.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
       - --log
+      - --log.level=DEBUG
       - --accessLog
       - --api
     deploy:
