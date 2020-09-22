@@ -23,6 +23,8 @@ services:
       - --certificatesresolvers.${STACK_NAME?required}-lets-encrypt-resolver-prod.acme.storage=/certs/acme.json
       # used during the challenge
       - --certificatesresolvers.${STACK_NAME?required}-lets-encrypt-resolver-prod.acme.httpchallenge.entrypoint=http
+      - --certificatesresolvers.${STACK_NAME?required}-lets-encrypt-resolver-prod.acme.caServer=https://acme-v02.api.letsencrypt.org/directory
+
 
       - --certificatesresolvers.${STACK_NAME?required}-lets-encrypt-resolver-staging.acme.email=${ACME_EMAIL?required}
       - --certificatesresolvers.${STACK_NAME?required}-lets-encrypt-resolver-staging.acme.storage=/certs/acme-staging.json
