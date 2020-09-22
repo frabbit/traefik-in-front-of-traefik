@@ -64,13 +64,6 @@ services:
       #   target: 80
       # - published: 8102
       #   target: 443
-    configs:
-      - source: certs
-        target: /etc/traefik/dyn.toml
-      - source: "cert_crt"
-        target: "/certs/cert.crt"
-      - source: "cert_key"
-        target: "/certs/cert.key"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik-certificates:/certs
