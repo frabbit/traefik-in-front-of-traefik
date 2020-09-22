@@ -1,0 +1,141 @@
+version: "3.7"
+
+configs:
+  "cert_crt":
+    file: "./certs/cert-app1.crt"
+  "cert_key":
+    file: "./certs/cert-app1.key"
+  "certs":
+    file: "./certs.toml"
+
+networks:
+  global-traefik-net: {
+    external: true
+  }
+  traefik-net: {}
+
+services:
+  traefik:
+    image: traefik:v2.3
+    command:
+      - --providers.file.filename=/etc/traefik/dyn.toml
+      - --providers.file.watch=true
+      - --providers.docker
+      - --providers.docker.constraints=Label(`traefik.constraint-label`, `${STACK_NAME?required}-traefik`)
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.swarmmode
+      - --entrypoints.http.address=:80
+      - --entrypoints.https.address=:443
+      - --log
+      - --accessLog
+      - --api
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.constraint-label=global-traefik
+        - traefik.docker.network=global-traefik-net
+        - traefik.http.routers.${STACK_NAME?required}-traefik-http.rule=HostRegexp(`{subdomain:[a-z0-9_-]+}.${APP_DOMAIN?required}`)
+        - traefik.http.routers.${STACK_NAME?required}-traefik-http.entrypoints=http
+        - traefik.http.routers.${STACK_NAME?required}-traefik-http.service=${STACK_NAME?required}-traefik-http-service
+        # HostSNIRegexp is not yet implemented, see https://github.com/traefik/traefik/issues/7266 for updates.
+        - traefik.tcp.routers.${STACK_NAME?required}-traefik-https.rule=HostSNI(`web1.${APP_DOMAIN?required}`, `web2.${APP_DOMAIN?required}`)
+        - traefik.tcp.routers.${STACK_NAME?required}-traefik-https.service=${STACK_NAME?required}-traefik-tcp-service
+        - traefik.tcp.routers.${STACK_NAME?required}-traefik-https.tls=true
+        - traefik.tcp.routers.${STACK_NAME?required}-traefik-https.tls.passthrough=true
+        - traefik.tcp.routers.${STACK_NAME?required}-traefik-https.entrypoints=https
+
+        - traefik.http.services.${STACK_NAME?required}-traefik-http-service.loadbalancer.server.port=80
+        - traefik.tcp.services.${STACK_NAME?required}-traefik-tcp-service.loadbalancer.server.port=443
+      mode: replicated
+      placement:
+        constraints:
+          - node.role == manager
+        preferences:
+          - spread: node.id
+      replicas: 1
+    networks:
+      - global-traefik-net
+      - traefik-net
+    ports: []
+      # only for debugging purposes
+      # - published: 8001
+      #   target: 80
+      # - published: 8101
+      #   target: 443
+    configs:
+      - source: certs
+        target: /etc/traefik/dyn.toml
+      - source: "cert_crt"
+        target: "/certs/cert.crt"
+      - source: "cert_key"
+        target: "/certs/cert.key"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+  web1:
+    image: frabbit/hello-world-custom
+    environment:
+      APP: 'web1 ${STACK_NAME?required}'
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.constraint-label=${STACK_NAME?required}-traefik
+        - traefik.docker.network=${STACK_NAME?required}_traefik-net
+
+        - traefik.http.routers.${STACK_NAME?required}-web1-http.rule=Host(`web1.${APP_DOMAIN?required}`)
+        - traefik.http.routers.${STACK_NAME?required}-web1-http.entrypoints=http
+        - traefik.http.routers.${STACK_NAME?required}-web1-http.service=${STACK_NAME?required}-web1-service
+
+        - traefik.http.routers.${STACK_NAME?required}-web1-https.rule=Host(`web1.${APP_DOMAIN?required}`)
+        - traefik.http.routers.${STACK_NAME?required}-web1-https.entrypoints=https
+        - traefik.http.routers.${STACK_NAME?required}-web1-https.tls=true
+        - traefik.http.routers.${STACK_NAME?required}-web1-https.service=${STACK_NAME?required}-web1-service
+
+        - traefik.http.services.${STACK_NAME?required}-web1-service.loadbalancer.server.port=3000
+
+      mode: replicated
+      placement:
+        constraints:
+          - node.role == manager
+        preferences:
+          - spread: node.id
+      replicas: 1
+    ports: []
+      # only for debugging purposes
+      # - published: 9001
+      #   target: 3000
+    networks:
+      - traefik-net
+  web2:
+    image: frabbit/hello-world-custom
+    environment:
+      APP: 'web2 ${STACK_NAME?required}'
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.constraint-label=${STACK_NAME?required}-traefik
+        - traefik.docker.network=${STACK_NAME?required}_traefik-net
+
+        - traefik.http.routers.${STACK_NAME?required}-web2-http.rule=Host(`web2.${APP_DOMAIN?required}`)
+        - traefik.http.routers.${STACK_NAME?required}-web2-http.entrypoints=http
+        - traefik.http.routers.${STACK_NAME?required}-web2-http.service=${STACK_NAME?required}-web2-service
+
+        - traefik.http.routers.${STACK_NAME?required}-web2-https.rule=Host(`web2.${APP_DOMAIN?required}`)
+        - traefik.http.routers.${STACK_NAME?required}-web2-https.entrypoints=https
+        - traefik.http.routers.${STACK_NAME?required}-web2-https.tls=true
+        - traefik.http.routers.${STACK_NAME?required}-web2-https.service=${STACK_NAME?required}-web2-service
+
+        - traefik.http.services.${STACK_NAME?required}-web2-service.loadbalancer.server.port=3000
+
+      mode: replicated
+      placement:
+        constraints:
+          - node.role == manager
+        preferences:
+          - spread: node.id
+      replicas: 1
+    ports: []
+      # only for debugging purposes
+      # - published: 9002
+      #   target: 3000
+    networks:
+      - traefik-net

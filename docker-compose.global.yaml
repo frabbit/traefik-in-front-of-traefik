@@ -1,0 +1,38 @@
+version: "3.7"
+
+networks:
+  global-traefik-net: {
+    external: true
+  }
+
+services:
+  traefik:
+    image: traefik:v2.3
+    command:
+      - --providers.docker
+      - --providers.docker.constraints=Label(`traefik.constraint-label`, `global-traefik`)
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.swarmmode
+      - --entrypoints.http.address=:80
+      - --entrypoints.https.address=:443
+      - --log
+      - --accessLog
+      - --api
+    deploy:
+      labels: []
+      mode: replicated
+      placement:
+        constraints:
+          - node.role == manager
+        preferences:
+          - spread: node.id
+      replicas: 1
+    networks:
+      - global-traefik-net
+    ports:
+      - published: 8000
+        target: 80
+      - published: 8100
+        target: 443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
