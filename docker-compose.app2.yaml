@@ -1,13 +1,5 @@
 version: "3.7"
 
-configs:
-  "cert_crt":
-    file: "./certs/cert-app2.crt"
-  "cert_key":
-    file: "./certs/cert-app2.key"
-  "certs":
-    file: "./certs.toml"
-
 networks:
   global-traefik-net:
     external: true
@@ -61,13 +53,6 @@ services:
       #   target: 80
       # - published: 8102
       #   target: 443
-    configs:
-      - source: certs
-        target: /etc/traefik/dyn.toml
-      - source: "cert_crt"
-        target: "/certs/cert.crt"
-      - source: "cert_key"
-        target: "/certs/cert.key"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
   web1:
