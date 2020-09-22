@@ -12,8 +12,6 @@ services:
   traefik:
     image: traefik:v2.3
     command:
-      - --providers.file.filename=/etc/traefik/dyn.toml
-      - --providers.file.watch=true
       - --providers.docker
       - --providers.docker.constraints=Label(`traefik.constraint-label`, `${STACK_NAME?required}-traefik`)
       - --providers.docker.exposedbydefault=false
