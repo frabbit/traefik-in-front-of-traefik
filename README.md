@@ -1,6 +1,7 @@
 # Generate Custom Certificates
 
-This is only to simulate custom certificates.
+This is only to simulate usage of custom certificates and how you load them inside of trafik. 
+Traefik generates an ssl-certificate when no custom certificate is provided. 
 
 ```shell
 mkdir certs
@@ -17,7 +18,10 @@ ENV=production APP_DOMAIN=app1.localhost STACK_NAME=app1 docker stack deploy -c 
 ENV=production APP_DOMAIN=app2.localhost STACK_NAME=app2 docker stack deploy -c docker-compose.app2.yaml app2
 ```
 
-# Multiple Envs
+# Multiple Environments
+
+Multiple Environments can live side by side as long as the configuration uses the STACK_NAME for unique router and service names.
+
 ```
 docker network create global-traefik-net --driver=overlay
 docker stack deploy -c docker-compose.global.yaml global
