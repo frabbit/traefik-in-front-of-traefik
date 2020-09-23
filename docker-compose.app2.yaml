@@ -25,11 +25,11 @@ services:
         - traefik.enable=true
         - traefik.constraint-label=global-traefik
         - traefik.docker.network=global-traefik-net
-        - traefik.http.routers.${STACK_NAME?required}-traefik-http.rule=HostRegexp(`{subdomain:[a-z0-9_-]+}.${APP_DOMAIN?required}`)
+        - traefik.http.routers.${STACK_NAME?required}-traefik-http.rule=HostRegexp(`{subdomain:[a-z0-9_-]+}${HOST_SUFFIX}.${APP_DOMAIN?required}`)
         - traefik.http.routers.${STACK_NAME?required}-traefik-http.entrypoints=http
         - traefik.http.routers.${STACK_NAME?required}-traefik-http.service=${STACK_NAME?required}-traefik-http-service
         # HostSNIRegexp is not yet implemented, see https://github.com/traefik/traefik/issues/7266 for updates.
-        - traefik.tcp.routers.${STACK_NAME?required}-traefik-https.rule=HostSNI(`web1.${APP_DOMAIN?required}`, `web2.${APP_DOMAIN?required}`)
+        - traefik.tcp.routers.${STACK_NAME?required}-traefik-https.rule=HostSNI(`web1${HOST_SUFFIX}.${APP_DOMAIN?required}`, `web2${HOST_SUFFIX}.${APP_DOMAIN?required}`)
         - traefik.tcp.routers.${STACK_NAME?required}-traefik-https.service=${STACK_NAME?required}-traefik-tcp-service
         - traefik.tcp.routers.${STACK_NAME?required}-traefik-https.tls=true
         - traefik.tcp.routers.${STACK_NAME?required}-traefik-https.tls.passthrough=true
@@ -65,11 +65,11 @@ services:
         - traefik.constraint-label=${STACK_NAME?required}-traefik
         - traefik.docker.network=${STACK_NAME?it is required}_traefik-net
 
-        - traefik.http.routers.${STACK_NAME?required}-web1-http.rule=Host(`web1.${APP_DOMAIN?required}`)
+        - traefik.http.routers.${STACK_NAME?required}-web1-http.rule=Host(`web1${HOST_SUFFIX}.${APP_DOMAIN?required}`)
         - traefik.http.routers.${STACK_NAME?required}-web1-http.entrypoints=http
         - traefik.http.routers.${STACK_NAME?required}-web1-http.service=${STACK_NAME?required}-web1-service
 
-        - traefik.http.routers.${STACK_NAME?required}-web1-https.rule=Host(`web1.${APP_DOMAIN?required}`)
+        - traefik.http.routers.${STACK_NAME?required}-web1-https.rule=Host(`web1${HOST_SUFFIX}.${APP_DOMAIN?required}`)
         - traefik.http.routers.${STACK_NAME?required}-web1-https.entrypoints=https
         - traefik.http.routers.${STACK_NAME?required}-web1-https.tls=true
         - traefik.http.routers.${STACK_NAME?required}-web1-https.service=${STACK_NAME?required}-web1-service
@@ -99,11 +99,11 @@ services:
         - traefik.constraint-label=${STACK_NAME?required}-traefik
         - traefik.docker.network=${STACK_NAME?required}_traefik-net
 
-        - traefik.http.routers.${STACK_NAME?required}-web2-http.rule=Host(`web2.${APP_DOMAIN?required}`)
+        - traefik.http.routers.${STACK_NAME?required}-web2-http.rule=Host(`web2${HOST_SUFFIX}.${APP_DOMAIN?required}`)
         - traefik.http.routers.${STACK_NAME?required}-web2-http.entrypoints=http
         - traefik.http.routers.${STACK_NAME?required}-web2-http.service=${STACK_NAME?required}-web2-service
 
-        - traefik.http.routers.${STACK_NAME?required}-web2-https.rule=Host(`web2.${APP_DOMAIN?required}`)
+        - traefik.http.routers.${STACK_NAME?required}-web2-https.rule=Host(`web2${HOST_SUFFIX}.${APP_DOMAIN?required}`)
         - traefik.http.routers.${STACK_NAME?required}-web2-https.entrypoints=https
         - traefik.http.routers.${STACK_NAME?required}-web2-https.tls=true
         - traefik.http.routers.${STACK_NAME?required}-web2-https.service=${STACK_NAME?required}-web2-service

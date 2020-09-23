@@ -29,9 +29,20 @@ ENV=production APP_DOMAIN=app1.localhost STACK_NAME=app1 docker stack deploy -c 
 ENV=staging APP_DOMAIN=app1-staging.localhost STACK_NAME=app1-staging docker stack deploy -c docker-compose.app1.yaml app1-staging
 ```
 
+# Environments with same Domain, but different Host suffix (Same Wildcard Cert can be used)
+
+You can reuse the same domain for different environments by adding a environment specific HOST_SUFFIX. The second stack in following example uses `-staging` as suffix which makes the application available under `web-staging.app1.localhost` instead of `web.app1.localhost`.
+
+```
+docker network create global-traefik-net --driver=overlay
+docker stack deploy -c docker-compose.global.yaml global
+ENV=production APP_DOMAIN=app1.localhost STACK_NAME=app1 docker stack deploy -c docker-compose.app1.yaml app1
+HOST_SUFFIX=-staging ENV=staging APP_DOMAIN=app1.localhost STACK_NAME=app1-staging docker stack deploy -c docker-compose.app1.yaml app1-staging
+```
+
 # Use Lets Encrypt certificate resolver behind global traefik instance
 
-Multiple Environments can live side by side as long as the configuration uses the STACK_NAME for unique router and service names.
+Traeffic 2+ with Let's Encrypt as certificate resolver **can only be used in single instance mode** (`replicas=1`).
 
 ```
 docker network create global-traefik-net --driver=overlay
