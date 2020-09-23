@@ -23,15 +23,10 @@ services:
       - --certificatesresolvers.${STACK_NAME?required}-lets-encrypt-resolver.acme.storage=/certs/acme.json
       # used during the challenge
       - --certificatesresolvers.${STACK_NAME?required}-lets-encrypt-resolver.acme.httpchallenge.entrypoint=http
-      - --certificatesresolvers.${STACK_NAME?required}-lets-encrypt-resolver.acme.caServer=https://acme-v02.api.letsencrypt.org/directory
-
-      - --certificatesresolvers.${STACK_NAME?required}-lets-encrypt-resolver-debug.acme.email=${ACME_EMAIL?required}
-      - --certificatesresolvers.${STACK_NAME?required}-lets-encrypt-resolver-debug.acme.storage=/certs/acme.json
-      # used during the challenge
-      - --certificatesresolvers.${STACK_NAME?required}-lets-encrypt-resolver-debug.acme.httpchallenge.entrypoint=http
-      - --certificatesresolvers.${STACK_NAME?required}-lets-encrypt-resolver-debug.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
+      # used for production certificates
+      #- --certificatesresolvers.${STACK_NAME?required}-lets-encrypt-resolver.acme.caServer=https://acme-v02.api.letsencrypt.org/directory
       # used for testing (new apps)
-      #- --certificatesresolvers.${STACK_NAME?required}-lets-encrypt-resolver.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
+      - --certificatesresolvers.${STACK_NAME?required}-lets-encrypt-resolver.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
       # used for development
 
       - --log
@@ -162,7 +157,7 @@ services:
         - traefik.http.routers.${STACK_NAME?required}-web3-https.rule=Host(`web3.${APP_DOMAIN?required}`)
         - traefik.http.routers.${STACK_NAME?required}-web3-https.entrypoints=https
         - traefik.http.routers.${STACK_NAME?required}-web3-https.tls=true
-        - traefik.http.routers.${STACK_NAME?required}-web3-https.tls.certresolver=${STACK_NAME?required}-lets-encrypt-resolver-debug
+        - traefik.http.routers.${STACK_NAME?required}-web3-https.tls.certresolver=${STACK_NAME?required}-lets-encrypt-resolver
         - traefik.http.routers.${STACK_NAME?required}-web3-https.service=${STACK_NAME?required}-web3-service
 
         - traefik.http.services.${STACK_NAME?required}-web3-service.loadbalancer.server.port=3000
