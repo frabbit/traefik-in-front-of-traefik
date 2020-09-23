@@ -47,7 +47,7 @@ services:
         - traefik.http.routers.${STACK_NAME?required}-traefik-http.entrypoints=http
         - traefik.http.routers.${STACK_NAME?required}-traefik-http.service=${STACK_NAME?required}-traefik-http-service
         # HostSNIRegexp is not yet implemented, see https://github.com/traefik/traefik/issues/7266 for updates.
-        - traefik.tcp.routers.${STACK_NAME?required}-traefik-https.rule=HostSNI(`web.${APP_DOMAIN?required}`, `web2.${APP_DOMAIN?required}`)
+        - traefik.tcp.routers.${STACK_NAME?required}-traefik-https.rule=HostSNI(`web.${APP_DOMAIN?required}`, `web2.${APP_DOMAIN?required}`, `web3.${APP_DOMAIN?required}`)
         - traefik.tcp.routers.${STACK_NAME?required}-traefik-https.service=${STACK_NAME?required}-traefik-tcp-service
         - traefik.tcp.routers.${STACK_NAME?required}-traefik-https.tls=true
         - traefik.tcp.routers.${STACK_NAME?required}-traefik-https.tls.passthrough=true
