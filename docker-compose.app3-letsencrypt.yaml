@@ -21,15 +21,13 @@ services:
 
       - --certificatesresolvers.${STACK_NAME?required}-lets-encrypt-resolver.acme.email=${ACME_EMAIL?required}
       - --certificatesresolvers.${STACK_NAME?required}-lets-encrypt-resolver.acme.storage=/certs/acme.json
-      # used during the challenge
       - --certificatesresolvers.${STACK_NAME?required}-lets-encrypt-resolver.acme.httpchallenge.entrypoint=http
-      # used for production certificates
+      # used for production certificates (rate limiting)
       #- --certificatesresolvers.${STACK_NAME?required}-lets-encrypt-resolver.acme.caServer=https://acme-v02.api.letsencrypt.org/directory
-      # used for testing (new apps)
+      # used for debugging configurations of new apps (no rate limiting)
       - --certificatesresolvers.${STACK_NAME?required}-lets-encrypt-resolver.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
-      # used for development
-
       - --log
+      # can be removed for production
       - --log.level=DEBUG
       - --accessLog
       - --api
@@ -126,41 +124,6 @@ services:
         - traefik.http.routers.${STACK_NAME?required}-web2-https.service=${STACK_NAME?required}-web2-service
 
         - traefik.http.services.${STACK_NAME?required}-web2-service.loadbalancer.server.port=3000
-
-      mode: replicated
-      placement:
-        constraints:
-          - node.role == manager
-        preferences:
-          - spread: node.id
-      replicas: 1
-    ports: []
-      # only for debugging purposes
-      # - published: 9003
-      #   target: 3000
-    networks:
-      - traefik-net
-  web3:
-    image: frabbit/hello-world-custom
-    environment:
-      APP: 'web3 ${STACK_NAME?it is required}'
-    deploy:
-      labels:
-        - traefik.enable=true
-        - traefik.constraint-label=${STACK_NAME?required}-traefik
-        - traefik.docker.network=${STACK_NAME?it is required}_traefik-net
-
-        - traefik.http.routers.${STACK_NAME?required}-web3-http.rule=Host(`web3.${APP_DOMAIN?required}`)
-        - traefik.http.routers.${STACK_NAME?required}-web3-http.entrypoints=http
-        - traefik.http.routers.${STACK_NAME?required}-web3-http.service=${STACK_NAME?required}-web3-service
-
-        - traefik.http.routers.${STACK_NAME?required}-web3-https.rule=Host(`web3.${APP_DOMAIN?required}`)
-        - traefik.http.routers.${STACK_NAME?required}-web3-https.entrypoints=https
-        - traefik.http.routers.${STACK_NAME?required}-web3-https.tls=true
-        - traefik.http.routers.${STACK_NAME?required}-web3-https.tls.certresolver=${STACK_NAME?required}-lets-encrypt-resolver
-        - traefik.http.routers.${STACK_NAME?required}-web3-https.service=${STACK_NAME?required}-web3-service
-
-        - traefik.http.services.${STACK_NAME?required}-web3-service.loadbalancer.server.port=3000
 
       mode: replicated
       placement:

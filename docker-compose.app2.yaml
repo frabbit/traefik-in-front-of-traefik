@@ -16,6 +16,7 @@ services:
       - --entrypoints.http.address=:80
       - --entrypoints.https.address=:443
       - --log
+      # can be removed for production
       - --log.level=DEBUG
       - --accessLog
       - --api

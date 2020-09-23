@@ -40,3 +40,21 @@ ENV=production APP_DOMAIN=mydomain STACK_NAME=app docker stack deploy -c docker-
 ENV=staging APP_DOMAIN=mydomain-staging STACK_NAME=app-staging docker stack deploy -c docker-compose.app3-letsencrypt.yaml app-staging
 ```
 
+## Let's Encrypt staging certificates
+
+The production server from Let's Encrypt has rate limiting enabled. This means it's easy to run out of certificate requests while trying to setup the configuration for a new application. In those cases the staging server can enabled by adding the following command line parameter:
+
+```shell
+- --certificatesresolvers.${STACK_NAME?required}-lets-encrypt-resolver.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
+```
+
+A successfully received staging certificate is added to your `acme.json` file and should have an issuer like `FAKE LE INTERMEDIATE X1`.
+After switching to the LE production server by commenting out the `caServer` option manuel interference is required. By default the old staging certificate will still be served and no new certificate for production will be requested from LE.
+The fake certificate needs to be removed from your `acme.json` file and the traefik instance service for this application needs to be restarted with:
+
+```shell
+docker service update app-trafik --force
+```
+
+It doesn't seem to be possible to register different certificate resolvers (debug and production) in your traefik configuration. The http challenge seems to interfere with each other leading to a situation where no new certificates can be requested. And because the http challenge has to be performed on port 80, an alternative port cannot be used.
+
